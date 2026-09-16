@@ -1,0 +1,26 @@
+{
+  "type": "create:mechanical_crafting",
+  "key": {
+    "A": {
+      "item": "kuayue:weathering_resistant_steel_board"
+    },
+    "B": {
+      "item": "kuayue:weathering_resistant_steel_pole"
+    },
+    "C": {
+      "item": "kuayue:carbon_dust"
+    }
+  },
+  "pattern": [
+    "CCC",
+    "AAA",
+    " B ",
+    " B ",
+    "AAA"
+  ],
+  "result": {
+    "count": 1,
+    "id": "kuayue:hxd3d_pantograph"
+  },
+  "accept_mirrored": false
+}

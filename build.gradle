@@ -1,0 +1,226 @@
+plugins {
+    id 'java-library'
+    id 'maven-publish'
+    id 'idea'
+    id 'net.neoforged.moddev' version '2.0.147'
+}
+
+version = mod_version
+group = mod_group_id
+
+repositories {
+    mavenLocal()
+    mavenCentral()
+    // Create + Flywheel
+    maven { url = 'https://maven.createmod.net' }
+    // Registrate (NeoForge 1.21.1 fork, used by Create 6.0)
+    maven { url = 'https://maven.ithundxr.dev/snapshots' }
+    // JEI
+    maven { url = 'https://maven.blamejared.com/' }
+    // Curios
+    maven { url = 'https://maven.theillusivec4.top/' }
+    // Steam 'n' Rails / modrinth
+    maven { url = 'https://api.modrinth.com/maven' }
+    maven {
+        url 'https://cursemaven.com'
+        content { includeGroup 'curse.maven' }
+    }
+    // Create 6.0's POM declares its optional integrations as regular dependencies
+    // (FTB Chunks/Teams/Library, CC:Tweaked, Architectury). They are not needed to
+    // compile, but Gradle must resolve them for every run* task's runtime classpath.
+    maven { url = 'https://maven.ftb.dev/releases' }   // dev.ftb.mods:*
+    maven { url = 'https://maven.architectury.dev/' }  // dev.architectury:*
+    maven { url = 'https://maven.squiddev.cc/' }       // cc.tweaked:*
+    // KasugaLib release/snapshot maven (same as original)
+    maven {
+        name = "KuaYue Maven"
+        url = uri("https://maven.kycraft.cn/releases")
+        content { includeGroup "kasuga.lib" }
+    }
+}
+
+base {
+    archivesName = mod_id
+}
+
+java.toolchain.languageVersion = JavaLanguageVersion.of(21)
+
+// Journeymap is pulled transitively (via Create 6.0's optional-integration POMs) onto the
+// runtime classpath and gets loaded as a mod. In this dev env journeymap 6.0.0-beta.46 crashes
+// in its OWN commonSetup with NoClassDefFoundError on journeymap.api.v2.client.util.PluginHelper
+// (absent from the resolved journeymap-api 2.0.0-SNAPSHOT), flipping the loader into a
+// "broken mod state" that refuses KuaYue's client events. KuaYue has zero journeymap references,
+// so exclude the broken pair from the dev run to validate KuaYue itself.
+configurations.all {
+    exclude group: 'maven.modrinth', module: 'journeymap'
+    exclude group: 'info.journeymap', module: 'journeymap-api-neoforge'
+}
+
+neoForge {
+    version = project.neo_version
+
+    parchment {
+        mappingsVersion = project.parchment_mappings_version
+        minecraftVersion = project.parchment_minecraft_version
+    }
+
+    runs {
+        client {
+            client()
+            systemProperty 'neoforge.enabledGameTestNamespaces', 'kuayue'
+        }
+        server {
+            server()
+            programArgument '--nogui'
+            systemProperty 'neoforge.enabledGameTestNamespaces', 'kuayue'
+        }
+        gameTestServer {
+            type = "gameTestServer"
+            systemProperty 'neoforge.enabledGameTestNamespaces', 'kuayue'
+        }
+        data {
+            data()
+            programArguments.addAll '--mod', 'kuayue', '--all',
+                    '--output', file('src/generated/resources/').getAbsolutePath(),
+                    '--existing', file('src/main/resources/').getAbsolutePath()
+        }
+        configureEach {
+            systemProperty 'forge.logging.markers', 'REGISTRIES'
+            logLevel = org.slf4j.event.Level.DEBUG
+        }
+    }
+
+    mods {
+        "${mod_id}" {
+            sourceSet(sourceSets.main)
+        }
+    }
+}
+
+sourceSets.main.resources { srcDir 'src/generated/resources' }
+
+// Datagen writes generated resources (lang, blockstates, models) into src/generated/resources,
+// which is also a resource source dir. Static curated files (e.g. the 94 KB en_us.json) must
+// win over the partial generated ones, so exclude duplicates instead of failing the build.
+processResources {
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+}
+
+// Surface ALL compile errors at once during migration (default caps at 100).
+tasks.withType(JavaCompile).configureEach {
+    options.compilerArgs += ['-Xmaxerrs', '10000']
+    // Opt-in machine-readable diagnostics (single unwrapped line per error).
+    // Enable with: gradlew compileJava -PdrawDiags
+    if (project.hasProperty('drawDiags')) {
+        options.compilerArgs += ['-XDrawDiagnostics']
+    }
+    if (name == 'compileJava') {
+        doFirst {
+            def ap = options.annotationProcessorPath
+            logger.lifecycle("APT_PATH=" + (ap ? ap.files.collect { it.name }.join(',') : 'NULL'))
+        }
+    }
+}
+
+dependencies {
+    // --- Lombok (same as original) ---
+    compileOnly "org.projectlombok:lombok:1.18.34"
+    annotationProcessor "org.projectlombok:lombok:1.18.34"
+
+    // --- Create 6.0 (NeoForge). ---
+    implementation "com.simibubi.create:create-${minecraft_version}:${create_version}"
+
+    // --- Flywheel (Create 6.0 depends on it at runtime; we need the API at compile time). ---
+    compileOnly "dev.engine-room.flywheel:flywheel-neoforge-api-${minecraft_version}:${flywheel_version}"
+    runtimeOnly "dev.engine-room.flywheel:flywheel-neoforge-${minecraft_version}:${flywheel_version}"
+
+    // --- Registrate (NeoForge 1.21.1 build, from ithundxr snapshots). ---
+    implementation "com.tterrag.registrate:Registrate:${registrate_version}"
+
+    // --- Steam 'n' Rails 1.21.1 (unofficial NeoForge port). ---
+    // Upstream: https://github.com/Porters-of-Railways/Railway-1.21.1
+    // Modrinth project id L3Jv0QZI (slug: create-steam-n-rails-1.21.1).
+    // Only the optional compat module (willow.train.kuayue.initial.compat.railways)
+    // touches these classes, and AllCompats guards entry behind ModList, so compileOnly suffices.
+    compileOnly "maven.modrinth:L3Jv0QZI:${snr_version}"
+    // Add SnR to the dev runtime to actually exercise the compat path under runClient:
+    // runtimeOnly "maven.modrinth:L3Jv0QZI:${snr_version}"
+
+    // --- JEI (NeoForge) ---
+    compileOnly "mezz.jei:jei-${minecraft_version}-neoforge:${jei_version}"
+    runtimeOnly "mezz.jei:jei-${minecraft_version}-neoforge:${jei_version}"
+
+    // --- Ponder (Create 6.0 split it out; Ponder jar also provides Catnip classes). ---
+    compileOnly "net.createmod.ponder:Ponder-NeoForge-${minecraft_version}:${ponder_version}"
+    runtimeOnly "net.createmod.ponder:Ponder-NeoForge-${minecraft_version}:${ponder_version}"
+
+    // --- MixinExtras (NeoForge) ---
+    compileOnly "io.github.llamalad7:mixinextras-common:${mixinextras_version}"
+    implementation "io.github.llamalad7:mixinextras-neoforge:${mixinextras_version}"
+
+    // --- Curios / WorldEdit (verify) ---
+    // implementation "top.theillusivec4.curios:curios-neoforge:${curios_version}"
+    // implementation "curse.maven:worldedit-225608:${worldedit_file}"
+
+    // --- KasugaLib (NeoForge port). Publish KasugaLib to mavenLocal first:
+    //     cd "D:/KasugaLib 0.22 Neoforge Port" && ./gradlew publishToMavenLocal -Ptype=create
+    //     Kuayue uses kasuga.lib.core.create.*, so it needs the "-create" flavour.
+    implementation "kasuga.lib:kasuga_lib:${kasuga_lib_version}"
+
+    // --- Javet, compileOnly on purpose. ---
+    // KasugaLib declares javet-core with <scope>runtime</scope>, so it never reaches our compile
+    // classpath. Several KasugaLib GUI classes (e.g. ...gui.nodes.GuiViewNode and its parents)
+    // carry Javet's @V8Convert annotation. When javac ENTERs a subclass of those (which Kuayue
+    // has many of), it cannot read that annotation class and reports
+    //     error: cannot access V8Convert / class file for com.caoccao.javet.annotations.V8Convert not found
+    // That is an enter-phase error, and any such error makes javac SKIP the whole
+    // annotation-processing phase -> Lombok silently stops generating @Getter/@Setter, which
+    // used to cascade into hundreds of bogus "cannot find symbol" errors.
+    compileOnly "com.caoccao.javet:javet-core:4.0.0"
+
+    // --- Mixed Arithmetic Logic Interpreter (KasugaLib embeds it via jarJar, but the
+    //     compile classpath doesn't expose interpreter.compute.data.*; install to mavenLocal:
+    //     see .workbuddy/tools/mali-1.1.0.jar)
+    implementation "edu.carole:Mixed-Arithmetic-Logic-Interpreter:1.1.0"
+}
+
+var generateModMetadata = tasks.register("generateModMetadata", ProcessResources) {
+    var replaceProperties = [minecraft_version      : minecraft_version,
+                             minecraft_version_range: minecraft_version_range,
+                             neo_version            : neo_version,
+                             neo_version_range      : neo_version_range,
+                             loader_version_range   : loader_version_range,
+                             mod_id                 : mod_id,
+                             mod_name               : mod_name,
+                             mod_license            : mod_license,
+                             mod_version            : mod_version,
+                             mod_authors            : mod_authors,
+                             mod_description        : mod_description]
+    inputs.properties replaceProperties
+    expand replaceProperties
+    from "src/main/templates"
+    into "build/generated/sources/modMetadata"
+}
+
+sourceSets.main.resources.srcDir generateModMetadata
+neoForge.ideSyncTask generateModMetadata
+
+publishing {
+    publications {
+        register('mavenJava', MavenPublication) {
+            from components.java
+        }
+    }
+    repositories {
+        maven {
+            url "file://${project.projectDir}/repo"
+        }
+    }
+}
+
+idea {
+    module {
+        downloadSources = true
+        downloadJavadoc = true
+    }
+}

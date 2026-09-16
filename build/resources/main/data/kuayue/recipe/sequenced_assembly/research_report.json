@@ -1,0 +1,70 @@
+{
+  "type": "create:sequenced_assembly",
+  "ingredient": {
+    "item": "minecraft:writable_book"
+  },
+  "loops": 3,
+  "results": [
+    {
+      "chance": 0.9,
+      "id": "kuayue:research_report"
+    },
+    {
+      "chance": 0.1,
+      "id": "minecraft:book"
+    }
+  ],
+  "sequence": [
+    {
+      "type": "create:deploying",
+      "ingredients": [
+        {
+          "item": "kuayue:research_report_thinking"
+        },
+        {
+          "item": "create:experience_nugget"
+        }
+      ],
+      "results": [
+        {
+          "id": "kuayue:research_report_thinking"
+        }
+      ]
+    },
+    {
+      "type": "create:deploying",
+      "ingredients": [
+        {
+          "item": "kuayue:research_report_thinking"
+        },
+        {
+          "item": "minecraft:black_dye"
+        }
+      ],
+      "results": [
+        {
+          "id": "kuayue:research_report_thinking"
+        }
+      ]
+    },
+    {
+      "type": "create:deploying",
+      "ingredients": [
+        {
+          "item": "kuayue:research_report_thinking"
+        },
+        {
+          "item": "create:experience_nugget"
+        }
+      ],
+      "results": [
+        {
+          "id": "kuayue:research_report_thinking"
+        }
+      ]
+    }
+  ],
+  "transitional_item": {
+    "id": "kuayue:research_report_thinking"
+  }
+}

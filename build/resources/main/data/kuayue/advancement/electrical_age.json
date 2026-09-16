@@ -1,0 +1,37 @@
+{
+  "display": {
+    "icon": {
+      "item": "kuayue:overhead_line_support_a1"
+    },
+    "title": {
+      "translate": "kuayue.advancement.electrical_age"
+    },
+    "description": {
+      "translate": "kuayue.advancement.electrical_age.desc"
+    },
+    "frame": "task",
+    "show_toast": true,
+    "announce_to_chat": false,
+    "hidden": false
+  },
+  "parent": "kuayue:get_steel",
+  "criteria": {
+    "0": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": [
+              "kuayue:overhead_line_wire"
+            ]
+          }
+        ]
+      }
+    }
+  },
+  "requirements": [
+    [
+      "0"
+    ]
+  ]
+}

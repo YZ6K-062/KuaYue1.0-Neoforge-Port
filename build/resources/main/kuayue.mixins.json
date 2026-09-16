@@ -1,0 +1,42 @@
+{
+  "required": true,
+  "priority": 1300,
+  "package": "willow.train.kuayue.mixins.mixin",
+  "compatibilityLevel": "JAVA_21",
+  "refmap": "kuayue.refmap.json",
+  "plugin": "willow.train.kuayue.mixins.mixin.KuayueMixinPlugin",
+  "mixins": [
+    "AccessorCarriageBogey",
+    "AccessorCarriageContraption",
+    "AccessorContraption",
+    "AccessorExternalRemainderBlockItem",
+    "AccessorFluidTank",
+    "AccessorMountedStorageManager",
+    "AccessorPlayerAdvancement",
+    "AccessorPortableFluidInterfaceBlockEntity",
+    "AccessorTrain",
+    "AccessorTrainCargoManager",
+    "AccessorTrainStatus",
+    "MixinAbstractContraptionEntity",
+    "MixinBeltDeployerCallbacks",
+    "MixinGlobalRailwayManager",
+    "MixinScheduleItem",
+    "MixinSequencedAssemblyRecipe",
+    "MixinSimpleBlockMovingInteraction",
+    "MixinStationBlockEntity",
+    "MixinTrackTargetingBlockItem",
+    "MixinTrain",
+    "SnrCompatibilityMixinStationBlockEntity",
+    "client.MixinBlockReg",
+    "compat.railways.MixinRailwaysTrainUtils"
+  ],
+  "client": [
+    "LevelRendererAccessor",
+    "AccessorCreativeModeInventoryScreen",
+    "client.AccessorEditBox",
+    "client.MixinCarriageContraptionEntityRenderer",
+    "client.MixinLivingEntityRenderer",
+    "client.TextureManagerAccessor"
+  ],
+  "minVersion": "0.8"
+}

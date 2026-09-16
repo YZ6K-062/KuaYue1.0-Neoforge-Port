@@ -1,0 +1,37 @@
+{
+  "display": {
+    "icon": {
+      "item": "kuayue:soaked_instant_noodles"
+    },
+    "title": {
+      "translate": "kuayue.advancement.instant_noodles"
+    },
+    "description": {
+      "translate": "kuayue.advancement.instant_noodles.desc"
+    },
+    "frame": "task",
+    "show_toast": true,
+    "announce_to_chat": false,
+    "hidden": false
+  },
+  "parent": "kuayue:root",
+  "criteria": {
+    "0": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": [
+              "kuayue:soaked_instant_noodles"
+            ]
+          }
+        ]
+      }
+    }
+  },
+  "requirements": [
+    [
+      "0"
+    ]
+  ]
+}

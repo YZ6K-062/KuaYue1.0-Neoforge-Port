@@ -1,0 +1,107 @@
+package willow.train.kuayue.event.both;
+
+import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.npc.VillagerProfession;
+import net.minecraft.world.entity.npc.VillagerTrades;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.item.trading.MerchantOffer;
+import net.neoforged.neoforge.event.entity.player.PlayerEvent;
+import net.neoforged.neoforge.event.level.LevelEvent;
+import net.neoforged.neoforge.event.village.VillagerTradesEvent;
+import net.neoforged.bus.api.SubscribeEvent;
+import willow.train.kuayue.Kuayue;
+import willow.train.kuayue.initial.AllItems;
+import willow.train.kuayue.systems.tech_tree.player.PlayerDataDist;
+import willow.train.kuayue.systems.tech_tree.player.PlayerDataManager;
+import willow.train.kuayue.systems.tech_tree.server.NetworkCacheManager;
+import willow.train.kuayue.systems.tech_tree.server.ServerNetworkCache;
+import willow.train.kuayue.systems.tech_tree.server.TechTreeManager;
+
+import java.util.List;
+import net.minecraft.world.item.trading.ItemCost;
+
+public class PlayerDataEvent {
+
+    @SubscribeEvent
+    public static void onLevelLoad(LevelEvent.Load event) {
+        if (event.getLevel().isClientSide()) return;
+        ServerLevel serverLevel = (ServerLevel) event.getLevel();
+        PlayerDataDist.DIST.loadFromDisk(serverLevel);
+        if(serverLevel.dimension().equals(ServerLevel.OVERWORLD)) {
+            Kuayue.OVERHEAD.savedData.load(serverLevel);
+            Kuayue.RAILWAY.savedData.loadFromDisk(serverLevel);
+            Kuayue.TRAIN_EXTENSION.distSaving.loadFromDisk(serverLevel);
+        }
+    }
+
+    @SubscribeEvent
+    public static void onLevelSave(LevelEvent.Save event) {
+        if (event.getLevel().isClientSide()) return;
+        ServerLevel serverLevel = (ServerLevel) event.getLevel();
+        PlayerDataDist.DIST.saveToDisk(serverLevel);
+        if(serverLevel.dimension().equals(ServerLevel.OVERWORLD)) {
+            Kuayue.OVERHEAD.savedData.save(serverLevel);
+            Kuayue.RAILWAY.savedData.saveToDisk(serverLevel);
+            Kuayue.TRAIN_EXTENSION.distSaving.saveToDisk(serverLevel);
+        }
+    }
+
+    @SubscribeEvent
+    public static void onLevelUnload(LevelEvent.Unload event) {
+        if (event.getLevel().isClientSide()) return;
+        NetworkCacheManager.MANAGER.stopAll();
+        PlayerDataManager.MANAGER.getPlayerData().clear();
+    }
+
+    @SubscribeEvent
+    public static void onPlayerLogin(PlayerEvent.PlayerLoggedInEvent event) {
+        Player player = event.getEntity();
+        if (player.level().isClientSide) return;
+
+        // TODO: need to be fixed
+//        AllPackets.TECH_TREE_CHANNEL.sendToClient(
+//                new DistributeTechTreePacket(),
+//                (ServerPlayer) player
+//        );
+//        TechTreeManager.sendAllPayloads((ServerPlayer) player);
+        ServerNetworkCache cache = NetworkCacheManager.MANAGER.addCacheFor((ServerPlayer) player);
+        TechTreeManager.MANAGER.trees().forEach((s, tree) -> cache.enqueueTree(tree));
+        TechTreeManager.MANAGER.notifyCycleDetected(player);
+        Kuayue.TRAIN_EXTENSION.BOGEY_EXTENSION.serverSync((ServerPlayer) event.getEntity());
+        Kuayue.TRAIN_EXTENSION.serverSync((ServerPlayer) event.getEntity());
+
+        if (PlayerDataManager.MANAGER.containsPlayerData(player)) return;
+        PlayerDataManager.MANAGER.createPlayerData(player);
+    }
+
+    @SubscribeEvent
+    public static void onPlayerLogout(PlayerEvent.PlayerLoggedOutEvent event) {
+        Player player = event.getEntity();
+        if (player.level().isClientSide) return;
+
+        NetworkCacheManager.MANAGER.removeCache((ServerPlayer) player);
+        if (PlayerDataManager.MANAGER.containsPlayerData(player)) {
+            PlayerDataDist.DIST.saveToDisk((ServerLevel) ((ServerPlayer) player).level());
+        }
+    }
+
+    @SubscribeEvent
+    public static void addCustomTrades(VillagerTradesEvent event) {
+
+        if (event.getType() == VillagerProfession.FARMER) {
+            Int2ObjectMap<List<VillagerTrades.ItemListing>> trades = event.getTrades();
+            ItemStack itemStack = new ItemStack(AllItems.SALT.getItem(), 5);
+            int villagerLevel = 1;
+
+            trades.get(villagerLevel).add((trader, rand) -> new MerchantOffer(
+                    new ItemCost(Items.EMERALD, 1),
+                    itemStack,
+                    10, 8, 0.02F
+            ));
+        }
+    }
+}

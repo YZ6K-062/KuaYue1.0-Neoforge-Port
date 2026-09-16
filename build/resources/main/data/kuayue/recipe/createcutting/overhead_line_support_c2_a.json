@@ -1,0 +1,19 @@
+{
+  "type": "create:cutting",
+  "ingredients": [
+    {
+      "item": "kuayue:overhead_line_support_c2"
+    }
+  ],
+  "results": [
+    {
+      "id": "kuayue:overhead_line_support_a1",
+      "count": 1
+    },
+    {
+      "id": "kuayue:overhead_line_support_a2",
+      "count": 1
+    }
+  ],
+  "processing_time": 50
+}

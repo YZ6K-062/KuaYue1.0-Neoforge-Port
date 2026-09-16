@@ -1,0 +1,56 @@
+# NeoForge mods.toml for KuaYue (1.21.1 port)
+modLoader = "javafml"
+loaderVersion = "[4,)"
+license = "MIT,CC-BY-SA4.0"
+
+[[mods]]
+modId = "kuayue"
+version = "1.0.2-neoforge"
+displayName = "KuaYue"
+displayURL = "https://www.kycraft.cn/#/"
+logoFile = "kuayue.jpg"
+credits = "苟利国家生死以，岂因祸福避趋之。"
+authors = "Carole,å¯ç±éåå°èå­,HTony03,shazimingjiang,èæ¼ ,æ¢§æ¡åè±,é²ç±³å¨å¨çº¿åäºº,TimeBather,Desert_walker,Aurora4123,LingshijunRenzy,mr.k,HappyKanda,ä¸åª6K-062,æ³æ æª,radekemia,yjn024,CGyuwan"
+description = '''åè²ç»å¸ï¼ç´ç¹é£èãä¸ºæºæ¢°å¨å(Create)å¶ä½çéè·¯è£é¥°æ¹åModãNeoForge 1.21.1 port.'''
+
+[[mixins]]
+config = "kuayue.mixins.json"
+
+[[dependencies."kuayue"]]
+modId = "neoforge"
+type = "required"
+versionRange = "[21,)"
+ordering = "NONE"
+side = "BOTH"
+
+[[dependencies."kuayue"]]
+modId = "minecraft"
+type = "required"
+versionRange = "[1.21.1,1.22)"
+ordering = "NONE"
+side = "BOTH"
+
+[[dependencies."kuayue"]]
+modId = "create"
+type = "required"
+versionRange = "[6.0.0,6.1)"
+ordering = "NONE"
+side = "BOTH"
+
+[[dependencies."kuayue"]]
+modId = "kasuga_lib"
+type = "required"
+versionRange = "[0.22,)"
+ordering = "NONE"
+side = "BOTH"
+
+# Optional: Create: Steam 'n' Rails (1.21.1 NeoForge port).
+# Only the compat module (willow.train.kuayue.initial.compat.railways) and the
+# KuayueMixinPlugin-gated MixinRailwaysTrainUtils mixin touch it. Declared so that,
+# when present, SnR initialises before Kuayue's compat hooks run.
+[[dependencies."kuayue"]]
+modId = "railways"
+type = "optional"
+versionRange = "[0.1.0,)"
+ordering = "AFTER"
+side = "BOTH"

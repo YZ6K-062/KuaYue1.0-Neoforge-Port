@@ -1,0 +1,52 @@
+{
+  "type": "create:sequenced_assembly",
+  "ingredient": {
+    "item": "kuayue:train_moulds"
+  },
+  "loops": 1,
+  "results": [
+    {
+      "id": "kuayue:general_bottom_slab_df21"
+    }
+  ],
+  "sequence": [
+    {
+      "type": "kuayue:blueprint_deploy",
+      "node": "kuayue:carriage_blueprint_group.node_head_df21_blueprint",
+      "paste_node_to_result": false,
+      "ingredients": [
+        {
+          "item": "kuayue:general_bottom_slab_df21"
+        },
+        {
+          "item": "kuayue:head_df21_blueprint"
+        }
+      ],
+      "results": [
+        {
+          "id": "kuayue:general_bottom_slab_df21"
+        }
+      ],
+      "keep_held_item": true
+    },
+    {
+      "type": "create:deploying",
+      "ingredients": [
+        {
+          "item": "kuayue:general_bottom_slab_df21"
+        },
+        {
+          "item": "kuayue:color_masterbatch"
+        }
+      ],
+      "results": [
+        {
+          "id": "kuayue:general_bottom_slab_df21"
+        }
+      ]
+    }
+  ],
+  "transitional_item": {
+    "id": "kuayue:train_moulds"
+  }
+}

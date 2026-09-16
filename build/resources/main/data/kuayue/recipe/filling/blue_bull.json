@@ -1,0 +1,19 @@
+{
+  "type": "create:filling",
+  "ingredients": [
+    {
+      "item": "kuayue:empty_can_blue"
+    },
+    {
+      "amount": 500,
+      "fluid": "kuayue:blue_bull_fluid",
+      "type": "neoforge:single"
+    }
+  ],
+  "results": [
+    {
+      "id": "kuayue:blue_bull",
+      "count": 1
+    }
+  ]
+}

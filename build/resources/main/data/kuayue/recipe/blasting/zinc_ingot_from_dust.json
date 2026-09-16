@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:blasting",
+  "category": "misc",
+  "cookingtime": 100,
+  "experience": 0.1,
+  "ingredient": {
+    "item": "kuayue:zinc_dust"
+  },
+  "result": {
+    "id": "create:zinc_ingot"
+  }
+}

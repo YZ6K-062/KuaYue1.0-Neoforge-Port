@@ -25,7 +25,9 @@
 
 
 其他语言 | Other languages : <a href="README.en.md">English</a>
-
+# 非官方，个人移植，跟官方团队无关，官方版看官方渠道。
+- https://github.com/KuaYueTeam/NeoKuayue
+# 注意：本项目使用人工智能技术，可能有未知Bug
 ## 介绍
 
 跨越是一个国铁风格的机械动力附属铁路模组。

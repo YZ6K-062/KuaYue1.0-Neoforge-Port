@@ -24,7 +24,9 @@
 
 
 其他语言 | Other languages : <a href="README.md">中文</a>
-
+# Unofficial personal port. Not affiliated with the official team. For official releases, check official channels.
+- https://github.com/KuaYueTeam/NeoKuayue
+# Note: This project uses artificial intelligence technology and may have unknown bugs.
 ## Introduction
 
 Kuayue is a Create train mod with Chinese railway style.
